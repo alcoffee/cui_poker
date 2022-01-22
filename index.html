@@ -11,58 +11,107 @@
 </head>
 <body>
 <div id="app-porker">
-    <ul>
-        <li>
+    <div style="">
+        <div style="float: left; padding: 10px">
             <input type="checkbox" id="hand1" value="0" v-model="checkedValues">
-            <label for="hand1"> {{ hand[0].mark }} {{ hand[0].num }}</label>
-        </li><li>
+            <label class="card border border-primary vh-300 " style="width: 120px;height: 200px" 
+            for="hand1">
+                 {{ hand[0].mark }} {{ hand[0].num }}
+            </label>
+        </div>
+        <div style="float: left; padding: 10px">
             <input type="checkbox" id="hand2" value="1" v-model="checkedValues">
-            <label for="hand2"> {{ hand[1].mark }} {{ hand[1].num }}</label>
-        </li><li>
+            <label class="card border border-primary vh-300 " style="width: 120px;height: 200px" 
+            for="hand2">
+                 {{ hand[1].mark }} {{ hand[1].num }}
+            </label>
+        </div>
+        <div style="float: left; padding: 10px">
             <input type="checkbox" id="hand3" value="2" v-model="checkedValues">
-            <label for="hand3"> {{ hand[2].mark }} {{ hand[2].num }}</label>
-        </li><li>
+            <label class="card border border-primary vh-300 " style="width: 120px;height: 200px" 
+            for="hand3">
+                 {{ hand[2].mark }} {{ hand[2].num }}
+            </label>
+        </div>
+        <div style="float: left; padding: 10px">
             <input type="checkbox" id="hand4" value="3" v-model="checkedValues">
-            <label for="hand4">{{ hand[3].mark }} {{ hand[3].num }}</label>
-        </li><li>
+            <label class="card border border-primary vh-300 " style="width: 120px;height: 200px" 
+            for="hand4">
+                 {{ hand[3].mark }} {{ hand[3].num }}
+            </label>
+        </div>
+        <div style="float: left; padding: 10px">
             <input type="checkbox" id="hand5" value="4" v-model="checkedValues">
-            <label for="hand5"> {{ hand[4].mark }} {{ hand[4].num }}</label>
-        </li>
-    </ul>
-    <p> 評価: {{ evaluationHand(hand) }}</p>
-    <input type="checkbox" id="debug" value="debug" @click="change">
-    <label for="debug"> debugや実験 </label>
-    <div v-if="debug">
-        <p>Checked Values: {{ checkedValues | json }}</p>
-        <p> 0から12までの乱数: {{ Math.floor(Math.random() * 13) }} </p>
-        <p> makeCard(): {{ makeCard() }}</p>
-        <p> makeCard('♠', '14'): {{ makeCard('♠', '14') }}</p>
-        <p> evaluationHand(): {{ evaluationHand(hand) }}</p>
-        <p> deduplication(hand): {{  deduplication(hand) }}</p>
+            <label class="card border border-primary vh-300 " style="width: 120px;height: 200px" 
+            for="hand5">
+                 {{ hand[4].mark }} {{ hand[4].num }}
+            </label>
+        </div>
+    </div>
+    
+    <div style="clear: both;">
+        <p> 評価: {{ evaluationHand(hand) }}</p>
+        <button class="btn btn-primary" @click="reload">ボタン</button>
+        <!-- <button class="button" @click="checkedReset">ボタン</button> -->
+        <hr>
+        <input type="checkbox" id="debug" value="debug" @click="change">
+        <label for="debug"> debugや実験 </label>
+        <div v-if="debug">
+            <p> Checked Values: {{ hand }} </p>
+            <p> Checked Values: {{ checkedValues | json }} </p>
+            <p> 0から12までの乱数: {{ Math.floor(Math.random() * 13) }} </p>
+            <p> makeCard(): {{ makeCard() }}</p>
+            <p> makeCard('♠', '14'): {{ makeCard('♠', '14') }}</p>
+            <p> evaluationHand(): {{ evaluationHand(hand) }}</p>
+            <p> deduplication(hand): {{ deduplication(hand) }}</p>
+            <!-- <p> reload(hand, checkedValues): {{ relaod(hand, checkedValues) }}</p> -->
+        </div>
     </div>
 </div>
 
 <script>
-    
-new Vue({
-  el: '#app-porker',
-  data: {
-      hand:[
-      makeCard(),
-      makeCard(),
-      makeCard(),
-      makeCard(),
-      makeCard(),
-      ],
-    checkedValues: [],
-    debug: false
-  },
-  methods: {
-    change: function(value) {
-      this.debug = value.target.checked
-    }
-  }
-})
+    new Vue({
+        el: '#app-porker',
+        data:
+        {
+            hand:[
+            makeCard(),
+            makeCard(),
+            makeCard(),
+            makeCard(),
+            makeCard(),
+            ],
+            checkedValues: [],
+            debug: false
+        },
+        methods:
+        {
+            change: function(value)
+            {
+                this.debug = !value.target.checked
+            },
+            /**
+             * 引き直し
+             */
+            reload: function()
+            {
+                let len = this.checkedValues.length;
+                for (var i=0; len+1 >= i; i++) {
+                    let index = this.checkedValues[i];
+                    this.$set(this.hand, index, makeCard());
+                }
+                this.checkedReset();
+                evaluationHand(this.hand);
+            },
+            checkedReset: function()
+            {
+                let len = this.checkedValues.length;
+                for (let i=0; i<=len; i++) {
+                    this.checkedValues.pop();
+                }
+            }
+        }
+    })
 
     /**
      * カードを生成
@@ -70,7 +119,7 @@ new Vue({
      * *説明* 引数がないと、ランダム
      *        ジョーカーは存在しないことになっている
      * 
-     * @param  マークと数値を指定
+     * @param マークと数値を指定
      * @return カードのマークと数値を返す
      */
     function makeCard (mark, num)
@@ -87,6 +136,15 @@ new Vue({
         }
 
         return return_string;
+    }
+
+    function relaod(hand, values)
+    {
+        for (var i=0; values.length<=i; i++) {
+            let index = values[i];
+            hand[index] = makeCard();
+        }
+        return values;
     }
 
     /**
@@ -134,7 +192,8 @@ new Vue({
     {
         let nums = [];
         let marks = [];
-        for (let i in hand) {
+        let len = hand.length
+        for (let i=0; len>i; i++) {
             nums.push(hand[i].num);
             marks.push(hand[i].mark);
         }
