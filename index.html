@@ -15,7 +15,7 @@
         <div v-for="(hand, index) in hands" style="float: left; padding: 10px">
             <input type="checkbox" id="hand" v-model="checkedValues"
                 :value="index" :id="'hand'+index">
-            <label style="width: 120px; height: 200px; background-color: rgb(235, 235, 235)"
+            <label style="width: 120px; height: 200px; background-color: lemonchiffon; border-radius: 7px"
                 :style="{ border: checkedValues.includes(index)?
                 borderDanger : borderPrimary }" :for="'hand' + index" >
                 {{ hand.mark }} {{ hand.num }}
@@ -56,8 +56,8 @@
             ],
             checkedValues: [],
             debug: false,
-            borderPrimary: '3px solid gray',
-            borderDanger: '3px solid blue',
+            borderPrimary: '2px solid gray',
+            borderDanger: '2px solid blue',
         },
         methods:
         {
@@ -71,7 +71,7 @@
             reload: function()
             {
                 let len = this.checkedValues.length;
-                for (var i=0; len+1 >= i; i++) {
+                for (var i=0; i <= len+1; i++) {
                     let index = this.checkedValues[i];
                     this.$set(this.hands, index, makeCard());
                 }
@@ -160,15 +160,15 @@
     /**
      * 手札から数字とマークの重複を排除した個数
      * 
-     * @param array card
+     * @param array hands
      * @return object
      */
     function deduplication(hands)
     {
         let nums = [];
         let marks = [];
-        let len = hands.length
-        for (let i=0; len>i; i++) {
+        let len = hands.length;
+        for (let i=0; i<len; i++) {
             nums.push(hands[i].num);
             marks.push(hands[i].mark);
         }
@@ -179,7 +179,26 @@
         return {marks: marks.length, nums: nums.length};
     }
 
-
+    /**
+     *  ストレートかどうかを判定し、
+     *  ストレートであればその強さを返す
+     *  
+     *  @param array hands
+     *  @return int
+     */
+    function isStraight(hands)
+    {
+        let nums = [];
+        let len = hands.length;
+        for (let i=0; i <= len; i++) {
+            nums.push(hands[i].num);
+        }
+        for (let i=0; i <= len; i++) {
+            for (let j=0; j <= len; i++) {
+                console.log('a');
+            }
+        }
+    }
 </script>
 </body>
 </html>
