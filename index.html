@@ -3,68 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <link href="./css/bootstrap.min.css" rel="stylesheet">
     <script src="./js/bootstrap.min.js"></script>
+    <script src="./lib/vue.min.js"></script>
 
     <title>ひとりポーカー</title>
 </head>
 <body>
 <div id="app-porker">
-    <div style="">
-        <div style="float: left; padding: 10px">
-            <input type="checkbox" id="hand1" value="0" v-model="checkedValues">
-            <label class="card border border-primary vh-300 " style="width: 120px;height: 200px" 
-            for="hand1">
-                 {{ hand[0].mark }} {{ hand[0].num }}
-            </label>
-        </div>
-        <div style="float: left; padding: 10px">
-            <input type="checkbox" id="hand2" value="1" v-model="checkedValues">
-            <label class="card border border-primary vh-300 " style="width: 120px;height: 200px" 
-            for="hand2">
-                 {{ hand[1].mark }} {{ hand[1].num }}
-            </label>
-        </div>
-        <div style="float: left; padding: 10px">
-            <input type="checkbox" id="hand3" value="2" v-model="checkedValues">
-            <label class="card border border-primary vh-300 " style="width: 120px;height: 200px" 
-            for="hand3">
-                 {{ hand[2].mark }} {{ hand[2].num }}
-            </label>
-        </div>
-        <div style="float: left; padding: 10px">
-            <input type="checkbox" id="hand4" value="3" v-model="checkedValues">
-            <label class="card border border-primary vh-300 " style="width: 120px;height: 200px" 
-            for="hand4">
-                 {{ hand[3].mark }} {{ hand[3].num }}
-            </label>
-        </div>
-        <div style="float: left; padding: 10px">
-            <input type="checkbox" id="hand5" value="4" v-model="checkedValues">
-            <label class="card border border-primary vh-300 " style="width: 120px;height: 200px" 
-            for="hand5">
-                 {{ hand[4].mark }} {{ hand[4].num }}
+    <div>
+        <div v-for="(hand, index) in hands" style="float: left; padding: 10px">
+            <input type="checkbox" id="hand" v-model="checkedValues"
+                :value="index" :id="'hand'+index">
+            <label style="width: 120px; height: 200px; background-color: rgb(235, 235, 235)"
+                :style="{ border: checkedValues.includes(index)?
+                borderDanger : borderPrimary }" :for="'hand' + index" >
+                {{ hand.mark }} {{ hand.num }}
             </label>
         </div>
     </div>
     
     <div style="clear: both;">
-        <p> 評価: {{ evaluationHand(hand) }}</p>
-        <button class="btn btn-primary" @click="reload">ボタン</button>
+        <p> 評価: {{ evaluationHands(hands) }}</p>
+        <button class="btn btn-primary" @click="reload">選択した手札を交換</button>
         <!-- <button class="button" @click="checkedReset">ボタン</button> -->
         <hr>
         <input type="checkbox" id="debug" value="debug" @click="change">
         <label for="debug"> debugや実験 </label>
         <div v-if="debug">
-            <p> Checked Values: {{ hand }} </p>
+            <p> Checked Values: {{ hands }} </p>
             <p> Checked Values: {{ checkedValues | json }} </p>
             <p> 0から12までの乱数: {{ Math.floor(Math.random() * 13) }} </p>
             <p> makeCard(): {{ makeCard() }}</p>
             <p> makeCard('♠', '14'): {{ makeCard('♠', '14') }}</p>
-            <p> evaluationHand(): {{ evaluationHand(hand) }}</p>
-            <p> deduplication(hand): {{ deduplication(hand) }}</p>
-            <!-- <p> reload(hand, checkedValues): {{ relaod(hand, checkedValues) }}</p> -->
+            <p> evaluationHands(): {{ evaluationHands(hands) }}</p>
+            <p> deduplication(hands): {{ deduplication(hands) }}</p>
         </div>
     </div>
 </div>
@@ -74,7 +47,7 @@
         el: '#app-porker',
         data:
         {
-            hand:[
+            hands:[
             makeCard(),
             makeCard(),
             makeCard(),
@@ -82,7 +55,9 @@
             makeCard(),
             ],
             checkedValues: [],
-            debug: false
+            debug: false,
+            borderPrimary: '3px solid gray',
+            borderDanger: '3px solid blue',
         },
         methods:
         {
@@ -98,10 +73,10 @@
                 let len = this.checkedValues.length;
                 for (var i=0; len+1 >= i; i++) {
                     let index = this.checkedValues[i];
-                    this.$set(this.hand, index, makeCard());
+                    this.$set(this.hands, index, makeCard());
                 }
                 this.checkedReset();
-                evaluationHand(this.hand);
+                evaluationHands(this.hands);
             },
             checkedReset: function()
             {
@@ -138,11 +113,11 @@
         return return_string;
     }
 
-    function relaod(hand, values)
+    function relaod(hands, values)
     {
         for (var i=0; values.length<=i; i++) {
             let index = values[i];
-            hand[index] = makeCard();
+            hands[index] = makeCard();
         }
         return values;
     }
@@ -154,14 +129,14 @@
      * @param 1-5
      * @return 揃った役の名前を表示
      */
-    function evaluationHand(hand)
+    function evaluationHands(hands)
     {
         // 手札が5枚なければ役は出来ない
-        if (false === (5 === hand.length)) {
+        if (false === (5 === hands.length)) {
             return "役なし";
         }
-        // 重複判定する
-        let d = deduplication(hand);
+        // 重複を判定する
+        let d = deduplication(hands);
 
         // 重複しない数字が２つならフォア・カードかフルハウス
         if (2 === d.nums) { 
@@ -188,14 +163,14 @@
      * @param array card
      * @return object
      */
-    function deduplication(hand)
+    function deduplication(hands)
     {
         let nums = [];
         let marks = [];
-        let len = hand.length
+        let len = hands.length
         for (let i=0; len>i; i++) {
-            nums.push(hand[i].num);
-            marks.push(hand[i].mark);
+            nums.push(hands[i].num);
+            marks.push(hands[i].mark);
         }
         // 重複を排除
         nums = Array.from(new Set(nums));
@@ -203,6 +178,7 @@
 
         return {marks: marks.length, nums: nums.length};
     }
+
 
 </script>
 </body>
