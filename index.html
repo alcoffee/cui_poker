@@ -28,8 +28,9 @@
         <button class="btn btn-primary" @click="reload">選択した手札を交換</button>
         <!-- <button class="button" @click="checkedReset">ボタン</button> -->
         <hr>
-        <input type="checkbox" id="debug" value="debug" @click="change">
-        <label for="debug"> debugや実験 </label>
+        <button class="btn btn-primary" id="debug" value="debug" @click="change">
+                debugや実験
+        </button>
         <div v-if="debug">
             <p> Checked Values: {{ hands }} </p>
             <p> Checked Values: {{ checkedValues | json }} </p>
@@ -63,7 +64,7 @@
         {
             change: function(value)
             {
-                this.debug = !value.target.checked
+                this.debug = !this.debug
             },
             /**
              * 引き直し
