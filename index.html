@@ -35,14 +35,14 @@
         <hr>
         <button class="btn btn-warning m-1" @click="cheetChange"> チート </button>
         <div class=" m-5" v-if="cheet">
-            <button class="btn btn-primary m-1" @click="tradeRandom">デッキのランダムな位置から選択した手札を交換</button>
-            <button class="btn btn-primary m-1" @click="remake">選択した手札をランダムに作り直す</button>
-            <button class="btn btn-primary m-1" @click="shuffle">山札をシャッフルする</button>
+            <button class="btn btn-warning m-1" @click="tradeRandom">デッキのランダムな位置から選択した手札を交換</button>
+            <button class="btn btn-warning m-1" @click="remake">選択した手札をランダムに作り直す</button>
+            <button class="btn btn-warning m-1" @click="shuffle">山札をシャッフルする</button>
             <hr>
-            <button class="btn btn-warning m-1" v-on:click="straight">ランダムなストレート</button>
-            <button class="btn btn-warning m-1" v-on:click="flash">ランダムなフラッシュ</button>
-            <button class="btn btn-warning m-1" v-on:click="sflash">ランダムなストレートフラッシュ</button>
-            <button class="btn btn-warning m-1" v-on:click="rsflash">ランダムなロイヤルストレートフラッシュ</button>
+            <button class="btn btn-danger m-1" v-on:click="straight">ランダムなストレート</button>
+            <button class="btn btn-danger m-1" v-on:click="flash">ランダムなフラッシュ</button>
+            <button class="btn btn-danger m-1" v-on:click="sflash">ランダムなストレートフラッシュ</button>
+            <button class="btn btn-danger m-1" v-on:click="rsflash">ランダムなロイヤルストレートフラッシュ</button>
             <hr>
             <p> 山札（上から）:<br> {{ showDeck() }} </p>
         </div>
