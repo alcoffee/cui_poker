@@ -27,22 +27,24 @@
     
     <div style="clear: both;">
         <hr>
-        <button class="btn btn-primary m-1" @click="redraw">選択した手札を交換</button>
+        <button class="btn btn-primary m-1" @click="trade">選択した手札を交換</button>
         <hr>
         <p> 評価: {{ evaluationHands(hands) }}</p>
         <p> 手番の回数: {{ changeCount }}</p>
-        <p> 山札の枚数: {{ deck.length }}</p>
+        <p> 山札の枚数: {{ deck.length }} / 52</p>
         <hr>
         <button class="btn btn-warning m-1" @click="cheetChange"> チート </button>
         <div class=" m-5" v-if="cheet">
+            <button class="btn btn-primary m-1" @click="tradeRandom">デッキのランダムな位置から選択した手札を交換</button>
             <button class="btn btn-primary m-1" @click="remake">選択した手札をランダムに作り直す</button>
+            <button class="btn btn-primary m-1" @click="shuffle">山札をシャッフルする</button>
             <hr>
             <button class="btn btn-warning m-1" v-on:click="straight">ランダムなストレート</button>
             <button class="btn btn-warning m-1" v-on:click="flash">ランダムなフラッシュ</button>
             <button class="btn btn-warning m-1" v-on:click="sflash">ランダムなストレートフラッシュ</button>
             <button class="btn btn-warning m-1" v-on:click="rsflash">ランダムなロイヤルストレートフラッシュ</button>
             <hr>
-            <p> 山札 : {{ deck }} </p>
+            <p> 山札（上から）:<br> {{ showDeck() }} </p>
             <hr>
             <button class="btn btn-danger" @click="debugChange"> debugや実験 </button>
             <div v-if="debug">
@@ -50,7 +52,7 @@
                 <p> Checked Values: {{ checkedValues | json }} </p>
                 <p> 0から12までの乱数: {{ Math.floor(Math.random() * 13) }} </p>
                 <p> makeCard(): {{ makeCard() }}</p>
-                <p> makeCard('♠', 14): {{ makeCard('♠', '14') }}</p>
+                <p> makeCard('♠', 13): {{ makeCard('♠', '13') }}</p>
                 <p> evaluationHands(): {{ evaluationHands(hands) }}</p>
                 <p> deduplication(hands): {{ deduplication(hands) }}</p>
                 <p> ソート後の手札 : {{ printHands(sortHands(hands.concat())) }} </p>
@@ -75,6 +77,7 @@
             checkedValues: [],
             changeCount: 0,
             cheet: false,
+            isAsc: false,
             debug: false,
         },
 
@@ -82,48 +85,26 @@
         {
             // 山札を初期化する
             initializeDeck(this.deck);
+            // 山札をシャッフルする
+            shuffleDeck(this.deck);
 
-            this.hands.push(drawCard(this.deck));
-            this.hands.push(drawCard(this.deck));
-            this.hands.push(drawCard(this.deck));
-            this.hands.push(drawCard(this.deck));
-            this.hands.push(drawCard(this.deck));
+            // 山札の一番上から手札を５枚引く
+            this.hands.push(drawCard(this.deck, 0));
+            this.hands.push(drawCard(this.deck, 0));
+            this.hands.push(drawCard(this.deck, 0));
+            this.hands.push(drawCard(this.deck, 0));
+            this.hands.push(drawCard(this.deck, 0));
         },
 
         methods:
         {
             cheetChange: function(value)
             {
-                this.cheet = !this.cheet
+                this.cheet = !this.cheet;
             },
             debugChange: function(value)
             {
-                this.debug = !this.debug
-            },
-            // デッキのカードと手札を交換する
-            redraw: function()
-            {
-                let len = this.checkedValues.length;
-                if (false === (0 === len)) {
-                    this.changeCount += 1;
-                }
-                for (var i=0; i < len; i++) {
-                    let index = this.checkedValues[i];
-                    this.$set(this.hands, index, drawCard(this.deck));
-                }
-                emptyArray(this.checkedValues);
-            },
-
-            // 選択した手札をランダムなカードに作り変える
-            remake: function()
-            {
-                let len = this.checkedValues.length;
-                for (var i=0; i < len; i++) {
-                    let index = this.checkedValues[i];
-                    this.$set(this.hands, index, makeCard());
-                }
-                emptyArray(this.checkedValues);
-                this.changeCount += 1;
+                this.debug = !this.debug;
             },
 
             // すべての選択する
@@ -140,19 +121,76 @@
                 }
             },
 
-            // 以下チート
-            // 手札を昇順に並べ替える
+            // 手札を並べ替える
             sort: function()
             {
-                sortHands(this.hands);
+                let hands_sorted = sortHands(this.hands.concat(), this.isAsc);
+                // sortHands(this.hands, this.isAsc);
+                // これだとVueの表示が更新されないので$setを使う
+                this.isAsc = !this.isAsc;
+                for (let i=0; i<this.hands.length; i++) {
+                    this.$set(this.hands, i, hands_sorted[i]);
+                }
                 emptyArray(this.checkedValues);
-                this.$set(this.hands);
             },
+
+            // デッキのカードと手札を交換する
+            tradeRandom: function()
+            {
+                let len = this.checkedValues.length;
+                if (false === (0 === len)) {
+                    this.changeCount += 1;
+                }
+                for (var i=0; i < len; i++) {
+                    let index = this.checkedValues[i];
+                    this.$set(this.hands, index, drawCard(this.deck));
+                }
+                emptyArray(this.checkedValues);
+            },
+
+            // デッキの一番上のカードと手札を交換する
+            trade: function()
+            {
+                let check_len = this.checkedValues.length;
+                if (false === (0 === check_len)) {
+                    this.changeCount += 1;
+                }
+                for (var i=0; i < check_len; i++) {
+                    let index = this.checkedValues[i];
+                    this.$set(this.hands, index, drawCard(this.deck, 0));
+                }
+                emptyArray(this.checkedValues);
+            },
+
+            // パス手番だけ増えるだけ
+            pass: function()
+            {
+                this.changeCount += 1;
+            },
+
+            // 選択した手札をランダムなカードに作り変える
+            remake: function()
+            {
+                let len = this.checkedValues.length;
+                for (var i=0; i < len; i++) {
+                    let index = this.checkedValues[i];
+                    this.$set(this.hands, index, makeCard());
+                }
+                emptyArray(this.checkedValues);
+                this.changeCount += 1;
+            },
+
+            // 山札をシャッフルする
+            shuffle: function()
+            {
+                shuffleDeck(this.deck);
+            },
+
 
             // ランダムなロイヤルストレートフラッシュ
             rsflash: function()
             {
-                let mark = marks[Math.floor(Math.random() * 4)];
+                let mark = marks[getRandomInt(4)];
                 for (let i=0; i<5; i++) {
                     this.hands[i] = makeCard(mark, 10 + i);
                 }
@@ -163,8 +201,8 @@
             // ランダムなストレートフラッシュ
             sflash: function()
             {
-                let mark = marks[Math.floor(Math.random() * 4)];
-                let num = Math.floor(Math.random() * 10);
+                let mark = marks[getRandomInt(4)];
+                let num = getRandomInt(4);
                 for (let i=0; i<5; i++) {
                     this.hands[i] = makeCard(mark, num + i);
                 }
@@ -176,9 +214,9 @@
             straight: function()
             {
                 let mark;
-                let num = Math.floor(Math.random() * 10);
+                let num = getRandomInt(10);
                 for (let i=0; i<5; i++) {
-                    mark = marks[Math.floor(Math.random() * 4)];
+                    mark = marks[getRandomInt(4)];
                     this.hands[i] = makeCard(mark, num + i);
                 }
                 this.changeCount += 1;
@@ -188,14 +226,25 @@
             // ランダムなフラッシュ
             flash: function()
             {
-                let mark = marks[Math.floor(Math.random() * 4)];
+                let mark = marks[getRandomInt(4)];
                 let num;
                 for (let i=0; i<5; i++) {
-                    num = Math.floor(Math.random() * 13);
-                    this.hands[i] = makeCard(mark, );
+                    num = getRandomInt(4);
+                    this.hands[i] = makeCard(mark, num);
                 }
                 this.changeCount += 1;
                 this.$set(this.hands);
+            },
+
+            // 山札の中身を表示する
+            showDeck: function()
+            {
+                let len = this.deck.length;
+                let strings = '';
+                for (let i=0; i<len; i++) {
+                    strings += stringHand(this.deck[i])+ ', ';
+                }
+                return strings;
             },
         },
     })
@@ -214,8 +263,8 @@
         let return_string = {mark, num};
 
         if (mark === undefined && num === undefined) {
-            return_string.mark = marks[Math.floor(Math.random() * marks.length)];
-            return_string.num = Math.floor(Math.random() * 13)+2;
+            return_string.mark = marks[getRandomInt(marks.length)];
+            return_string.num = getRandomInt(13)+2;
         } else {
             return_string = {mark: mark, num: num};
         }
@@ -226,34 +275,25 @@
     /**
      * デッキからカードを引く
      * 
-     * *説明* 引数がないと、ランダム
-     *        ジョーカーは存在しないことになっている
+     * *説明* ランダム
      * 
      * @param array デッキ
-     * @param int マークを番号を指定
-     * @param int 数値を指定
+     * @param int index
      * @return カードのマークと数値を返す
      */
-    function drawCard (deck, mark, num)
+    function drawCard(deck, index)
     {
-        let return_card = undefined;
-        let random_draw_num = Math.floor(Math.random() * deck.length);
+        let random_draw_num = getRandomInt(deck.length);
+        let card;
 
-        if (mark === undefined && num === undefined) {
-            return_card = deck[random_draw_num];
+        if (undefined === index) {
+            card = deck[random_draw_num];
             deck.splice(random_draw_num, 1);
-            return return_card;
+            return card;
         } else {
-            let isExit = deck.indexOf(makeCard(marks[mark], num));
-            if (isExit) {
-                let index = isExit;
-                return_card = makeCard(marks[mark], num);
-                deck.splice(index, 1);
-                return return_card;
-            } else {
-                return_card = undefined;
-                return return_card;
-            }
+            card = deck[index];
+            deck.splice(index, 1);
+            return card;
         }
     }
 
@@ -264,6 +304,8 @@
     function emptyArray(array)
     {
         let len = array.length;
+        // array.push(0);
+        // array.pop(0);
         for (let i=0; i<len; i++) {
             array.pop();
         }
@@ -375,25 +417,30 @@
      * 
      * *説明* 単純なソートでlog(n^2)
      * @param array hands
+     * @param bool isAsc
      * @return array hands
      */
-    function sortHands(hands)
+    function sortHands(hands, isAsc)
     {
         let len = hands.length;
         let hand_tmp;
+        
+        if (undefined === isAsc) {
+            isAsc = false;
+        }
 
         // 単純なソート 
         for (var i=0; i<len-1; i++) {
             for (var j=i+1; j<len; j++) {
                 // 数字を比較
-                if (true === (hands[i].num > hands[j].num)) {
+                if (isAsc === (hands[i].num < hands[j].num)) {
                     hand_tmp = hands[j];
                     hands[j] = hands[i];
                     hands[i] = hand_tmp;
                 }
                 // 数字が同じだったらマークを比較してソート（弱いほど左）
                 if (hands[i].num === hands[j].num) {
-                    if (markPriority(hands[j] > markPriority(hands[i]))) {
+                    if (isAsc === (markPriority(hands[j]) < markPriority(hands[i]))) {
                     hand_tmp = hands[j];
                     hands[j] = hands[i];
                     hands[i] = hand_tmp;
@@ -487,6 +534,33 @@
                 deck.push(makeCard(marks[i], j))
             }
         }
+    }
+
+    /**
+     * 山札をシャッフルする
+     */
+    function shuffleDeck(deck)
+    {
+        let len = deck.length;
+        let card = undefined;
+        let rand = undefined;
+        for (let i=0; i<len; i++) {
+            card = deck[i];
+            rand = getRandomInt(len)
+            deck.splice(i, 1);
+            deck.splice(getRandomInt(len), 0, card);
+        }
+    }
+
+    /**
+     * ランダムな整数
+     * 
+     * @param int max 最大値
+     * @return 0からmax-1までの整数
+     */
+    function getRandomInt(max)
+    {
+        return Math.floor(Math.random() * max);
     }
 </script>
 </body>
