@@ -45,20 +45,6 @@
             <button class="btn btn-warning m-1" v-on:click="rsflash">ランダムなロイヤルストレートフラッシュ</button>
             <hr>
             <p> 山札（上から）:<br> {{ showDeck() }} </p>
-            <hr>
-            <button class="btn btn-danger" @click="debugChange"> debugや実験 </button>
-            <div v-if="debug">
-                <p> 手札 : {{ printHands(hands) }} </p>
-                <p> Checked Values: {{ checkedValues | json }} </p>
-                <p> 0から12までの乱数: {{ Math.floor(Math.random() * 13) }} </p>
-                <p> makeCard(): {{ makeCard() }}</p>
-                <p> makeCard('♠', 13): {{ makeCard('♠', '13') }}</p>
-                <p> evaluationHands(): {{ evaluationHands(hands) }}</p>
-                <p> deduplication(hands): {{ deduplication(hands) }}</p>
-                <p> ソート後の手札 : {{ printHands(sortHands(hands.concat())) }} </p>
-                <p> ストレートかどうか：{{ isStraight(hands)? 'ストレート' : '違う' }}</p>
-                <p> sameNumCount(hands)：{{ sameNumCount(hands) }} </p>
-            </div>
         </div>
     </div>
 </div>
