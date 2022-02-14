@@ -362,8 +362,9 @@ window.onload = function () {
             // すべての選択する
             checkall: function()
             {
-                if ( 5 === this.checkedValues.length) {
-                    for (let i=0; i<5; i++) {
+                let len_check = this.checkedValues.length;
+                if (this.hands.length < len_check+1) {
+                    for (let i=0; i<len_check; i++) {
                         this.checkedValues.pop();
                     }
                 } else {
