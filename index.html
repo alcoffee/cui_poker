@@ -7,12 +7,16 @@
     <script src="./js/bootstrap.min.js"></script>
     <script src="./lib/vue.min.js"></script>
     <script src="./vue_poker.js"></script>
-    <title>ひとりポーカー（github上）</title>
+    <title>ひとりポーカー</title>
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-<div id="app-porker">
+<div id="app-porker" v-cloak>
     <button class="btn btn-info m-1" v-on:click="sort">手札の並び替え</button>
-    <button class="btn btn-secondary m-1" v-on:click="checkall">全てを選択（トグル）</button>
     <div>
         <div v-for="(hand, index) in hands" style="float: left; padding: 10px">
             <input type="checkbox" id="hand" v-model="checkedValues"
@@ -28,12 +32,13 @@
     <div style="clear: both;">
         <hr>
         <button class="btn btn-primary m-1" @click="trade">選択した手札を交換</button>
+        <button class="btn btn-secondary m-1" v-on:click="checkall">全てを選択（トグル）</button>
         <hr>
         <p> 評価: {{ evaluationHands(hands) }}</p>
         <p> 手番の回数: {{ changeCount }}</p>
         <p> 山札の枚数: {{ deck.length }} / 52</p>
         <hr>
-        <button class="btn btn-warning m-1" @click="cheetChange"> チート </button>
+        <button class="btn btn-warning m-1" @click="cheetChange">チート</button>
         <div class=" m-5" v-if="cheet">
             <button class="btn btn-warning m-1" @click="tradeRandom">デッキのランダムな位置から選択した手札を交換</button>
             <button class="btn btn-warning m-1" @click="remake">選択した手札をランダムに作り直す</button>
